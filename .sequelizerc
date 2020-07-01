@@ -1,0 +1,8 @@
+const { resolve } = require('path'); // retorna o metodo 'resolve' do package 'path' que já vem no node, que padroniza os caminhos de diretorio em diferentes SO's e retorna uma string, cada seguimento do caminho é separado em parâmetros
+
+module.exports = {
+    config: resolve(__dirname, 'src','config','database.js'),
+    'models-path': resolve(__dirname, 'src','app','models'),
+    'migrations-path': resolve(__dirname, 'src','database','migrations'),
+    'seeders-path': resolve(__dirname, 'src','database','seeds'),
+}
