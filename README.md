@@ -1,0 +1,1 @@
+REST Api que servira frontend React e mobile de uma aplicação de agendamentos
