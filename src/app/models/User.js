@@ -19,14 +19,14 @@ class User extends Model {
         this.addHook('beforeSave', async (user)=>{
             if(user.password) {
                 user.password_hash = await bcrypt.hash(user.password, 8 );
-            }
+            }   
         })
 
         return this;
     }
 //faz o relacionamento entre as tabelas user e file 
     static associate(models){
-        this.belongsTo(models.File,{ foreignKey : 'avatar_id'})
+        this.belongsTo(models.Files,{ foreignKey : 'avatar_id'})
     }
 
     checkPassword(password){

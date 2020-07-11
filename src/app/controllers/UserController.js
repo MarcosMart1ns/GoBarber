@@ -51,8 +51,9 @@ class UserController{
         const { email, oldPassword } = req.body;
 
         const user = await User.findByPk(req.userId);
+        console.log(user);
 
-        if(email != user.email){
+        if(email && email != user.email){
             const UserExists = await User.findOne({ where : { email }})
 
             if(UserExists){
