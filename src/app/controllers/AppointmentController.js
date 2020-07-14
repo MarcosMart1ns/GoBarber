@@ -1,8 +1,28 @@
 import User from '../models/User'
-import Appointment from '../models/Appointments'
+import Appointments from '../models/Appointments'
 import * as Yup from 'yup'
+import { parseISO, startOfHour, isBefore } from 'date-fns';
 
 class AppointmentController{
+    async index(req,res){
+        const appointments = await Appointments.findAll({
+            where: {
+                user_id: req.userId,
+                canceled_at: null,
+            },
+            order:['date'],
+            include: [
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['id','name']
+                }
+            ]
+        });
+
+        return res.json(appointments);
+    }
+
     async store(req, res){
         const schema = Yup.object().shape({
             provider_id: Yup.string().required(),
@@ -28,8 +48,27 @@ class AppointmentController{
             return res.status(400).json({ erro: "Apenas é possível criar agendamento com um provedor, insira um provedor de serviços"})
         }
 
+        const hourStart = startOfHour(parseISO(date));
 
-        const appointment = await Appointment.create({
+        if(isBefore(hourStart,new Date())){
+            return res.status(400).json({error: 'Insira uma data posterior a atual'});
+        }
+
+        const checkAvaliability = await Appointments.findOne({
+            where:{
+                provider_id,
+                canceled_at: null,
+                date: hourStart
+            }
+        })
+
+        if(checkAvaliability){
+            return res.status(400).json({
+                error: "Data e hora de agendamento não disponível"
+            })
+        }
+
+        const appointment = await Appointments.create({
             user_id: req.userId,
             date,
             provider_id,
