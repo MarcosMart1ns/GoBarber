@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { parseISO, startOfHour, isBefore, format } from 'date-fns';
+import { parseISO, startOfHour, isBefore, format,subHours } from 'date-fns';
 
 import User from '../models/User'
 import File from '../models/Files'
@@ -107,7 +107,29 @@ class AppointmentController{
     }
 
     async delete(req,res){
-        return res.json();
+        const appointments = await Appointments.findByPk(
+            req.params.id
+        )
+        
+        console.log("Usuario logado:"+req.userId);
+        console.log("Usuario do agenda"+appointments.user_id)
+        console.log(appointments)
+        if(appointments.user_id != req.userId){
+            return res.status(401).json({ error: 'Você não tem permissão para cancelar esse agendamento'})
+        }
+
+        const dateWithSub = subHours(appointments.date,2);
+
+        if(isBefore(dateWithSub, new Date())){
+            return res.status(401).json({erro: "Agendamentos apenas podem ser cancelados até 2h antes do agendado"})
+        }
+
+        appointments.canceled_at = new Date();
+
+        await appointments.save();
+
+        
+        return res.json(appointments);
     }
    
 }
