@@ -1,5 +1,6 @@
 import * as Yup from 'yup'
 import { parseISO, startOfHour, isBefore, format,subHours } from 'date-fns';
+import Mail from '../../lib/Mail'
 
 import User from '../models/User'
 import File from '../models/Files'
@@ -108,12 +109,17 @@ class AppointmentController{
 
     async delete(req,res){
         const appointments = await Appointments.findByPk(
-            req.params.id
+            req.params.id,{
+                include:[
+                    {
+                        model: User,
+                        as: 'provider',
+                        attributes: ['name','email'],
+                    }
+                ]
+            }
         )
         
-        console.log("Usuario logado:"+req.userId);
-        console.log("Usuario do agenda"+appointments.user_id)
-        console.log(appointments)
         if(appointments.user_id != req.userId){
             return res.status(401).json({ error: 'Você não tem permissão para cancelar esse agendamento'})
         }
@@ -127,6 +133,12 @@ class AppointmentController{
         appointments.canceled_at = new Date();
 
         await appointments.save();
+
+        await Mail.sendMail({
+            to: `${ appointments.provider.name} <${ appointments.provider.email } >`,
+            subject: 'Agendamento cancelado',
+            text: 'Você tem um atendimento cancelado',
+        });
 
         
         return res.json(appointments);
