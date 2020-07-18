@@ -1,5 +1,6 @@
 import * as Yup from 'yup'
 import { parseISO, startOfHour, isBefore, format,subHours } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Mail from '../../lib/Mail'
 
 import User from '../models/User'
@@ -93,11 +94,9 @@ class AppointmentController{
         const user = await User.findByPk(req.userId);
         const formatedDate = format(
             hourStart,
-            "'dia' dd 'de' MMMM 'de' yyyy 'ás' HH:mm'h' ",
-            {
-                timeZone: 'America/Sao_Paulo',
-            }
-        );
+            "'dia' dd 'de' MMMM', às' H:mm'h'", {
+            locale: pt,
+        })
 
         await Notifications.create({
             content: `Novo agendamento de ${ user.name } para o ${ formatedDate }`,
@@ -141,15 +140,19 @@ class AppointmentController{
         await appointments.save();
 
         await Mail.sendMail({
-            to: `${ appointments.provider.name} <${ appointments.provider.email } >`,
+            to: `${appointments.provider.name} <${appointments.provider.email}>`,
             subject: 'Agendamento cancelado',
             template: 'cancellation',
             context: {
-                provider: appointments.provider.name,
-                use: appointments.user.name,
-                date: format(appointments.date, "'dia' dd 'de' MMMM', às' H:mm'h'"),
-            }
-        });
+              provider: appointments.provider.name,
+              user: appointments.user.name,
+              date: format(appointments.date, "'dia' dd 'de' MMMM', às' H:mm'h'", {
+                locale: pt, 
+              }),
+            },
+          });
+
+
 
         
         return res.json(appointments);
