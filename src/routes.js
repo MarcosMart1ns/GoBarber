@@ -17,6 +17,7 @@ const routes = new Router();
 const upload = multer(multerConfig);
 
 routes.get('/',(req,res)=>{
+    
     return res.send({message:"funfou!!"});
 })
 
