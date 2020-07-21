@@ -8,13 +8,13 @@ import ProvidersController from './app/controllers/ProvidersController';
 import AppointmentController from './app/controllers/AppointmentController';
 import ScheduleController from './app/controllers/ScheduleController';
 import NotificationController from './app/controllers/NotificationController';
+import AvailableController from './app/controllers/AvailableController';
 
 import multerConfig from './config/multer';
 import authMiddleware from './app/middlewares/auth';
 
 const routes = new Router();
 const upload = multer(multerConfig);
-
 
 routes.get('/',(req,res)=>{
     return res.send({message:"funfou!!"});
@@ -34,5 +34,6 @@ routes.delete('/appointments/:id', AppointmentController.delete);
 routes.get('/schedule', ScheduleController.index);
 routes.get('/notifications', NotificationController.index);
 routes.put('/notifications/:id', NotificationController.update);
+routes.get('/providers/:providersId/available', AvailableController.index);
 
 export default routes;
